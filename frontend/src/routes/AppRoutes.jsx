@@ -1,23 +1,43 @@
-import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage.jsx';
 import RegisterPage from '../pages/RegisterPage.jsx';
 import TransactionsPage from '../pages/TransactionsPage.jsx';
+import BudgetsPage from '../pages/BudgetsPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import Button from '../components/ui/Button.jsx';
 
 function NavPlaceholder() {
   const { logout, user } = useAuth();
+  const location = useLocation();
+
+  const navLinks = [
+    { to: '/transactions', label: 'Transactions' },
+    { to: '/budgets', label: 'Budgets' },
+  ];
+
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center">
+    <nav className="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center sticky top-0 z-40">
       <div className="flex items-center gap-6">
-        <span className="font-bold text-lg text-blue-600">Finance Tracker</span>
-        <Link to="/transactions" className="text-sm font-medium text-gray-700 hover:text-blue-600">
-          Transactions
-        </Link>
+        <span className="font-bold text-lg text-blue-600">💰 FinanceTracker</span>
+        {navLinks.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={`text-sm font-medium transition-colors ${
+              location.pathname === link.to
+                ? 'text-blue-600 border-b-2 border-blue-600 pb-0.5'
+                : 'text-gray-600 hover:text-blue-600'
+            }`}
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">Hello, {user?.fullName || 'User'}</span>
+        <span className="text-sm text-gray-600 hidden sm:block">
+          Hello, <span className="font-medium">{user?.fullName || 'User'}</span>
+        </span>
         <Button variant="outline" size="sm" onClick={logout}>
           Logout
         </Button>
@@ -46,6 +66,16 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <LayoutWrapper>
               <TransactionsPage />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/budgets"
+        element={
+          <ProtectedRoute>
+            <LayoutWrapper>
+              <BudgetsPage />
             </LayoutWrapper>
           </ProtectedRoute>
         }

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Plus, Tags } from 'lucide-react';
 import { transactionApi } from '../api/transactionApi.js';
 import { categoryApi } from '../api/categoryApi.js';
+import { budgetApi } from '../api/budgetApi.js';
 import TransactionList from '../components/transactions/TransactionList.jsx';
 import TransactionFilters from '../components/transactions/TransactionFilters.jsx';
 import TransactionForm from '../components/transactions/TransactionForm.jsx';
@@ -27,7 +28,6 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(INITIAL_FILTERS);
 
-  // Modals state
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
@@ -36,9 +36,7 @@ export default function TransactionsPage() {
     try {
       const res = await categoryApi.getAll();
       setCategories(res.data || []);
-    } catch {
-      toast.error('Failed to load categories');
-    }
+    } catch { /* silent */ }
   };
 
   const loadTransactions = useCallback(async () => {
@@ -54,8 +52,28 @@ export default function TransactionsPage() {
     }
   }, [filters]);
 
+  // Show budget alerts as toasts on first load
+  const checkBudgetAlerts = async () => {
+    try {
+      const res = await budgetApi.getAlerts();
+      const alerts = res.data || [];
+      alerts.forEach((alert) => {
+        if (alert.alertLevel === 'CRITICAL') {
+          toast.error(alert.message, { duration: 6000, id: `budget-${alert.budgetId}` });
+        } else {
+          toast(alert.message, {
+            duration: 5000,
+            icon: '⚠️',
+            id: `budget-${alert.budgetId}`,
+          });
+        }
+      });
+    } catch { /* silent */ }
+  };
+
   useEffect(() => {
     loadCategories();
+    checkBudgetAlerts();
   }, []);
 
   useEffect(() => {
@@ -92,7 +110,6 @@ export default function TransactionsPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
@@ -113,7 +130,6 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* Filter Bar */}
       <TransactionFilters
         filters={filters}
         onChange={setFilters}
@@ -121,7 +137,6 @@ export default function TransactionsPage() {
         categories={categories}
       />
 
-      {/* Table List */}
       <TransactionList
         transactions={transactions}
         loading={loading}
@@ -134,7 +149,6 @@ export default function TransactionsPage() {
         onDelete={handleDeleteTx}
       />
 
-      {/* Transaction Modal */}
       <Modal
         isOpen={isTxModalOpen}
         onClose={() => {
@@ -154,7 +168,6 @@ export default function TransactionsPage() {
         />
       </Modal>
 
-      {/* Categories Management Modal */}
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
