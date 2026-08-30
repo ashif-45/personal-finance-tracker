@@ -176,7 +176,7 @@ Make sure you have the following installed:
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/personal-finance-tracker.git
+git clone https://github.com/ashif-45/personal-finance-tracker
 cd personal-finance-tracker
 ```
 
@@ -192,14 +192,14 @@ CREATE DATABASE IF NOT EXISTS finance_tracker;
 
 > **Note:** The application uses `spring.jpa.hibernate.ddl-auto=update`, so all tables will be created automatically on first run.
 
-Update credentials in `backend/src/main/resources/application.yml` if your MySQL username/password differ from `root/root`:
+Update credentials in `backend/src/main/resources/application.yml` if your MySQL username/password differ from `your-username/your-password`:
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/finance_tracker?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://localhost:3306/<your-database-name>?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: <your-username>
+    password: <your-password>
 ```
 
 ---
@@ -348,9 +348,9 @@ docker-compose down -v
 ### Backend (`application.yml`)
 | Variable | Default | Description |
 |---|---|---|
-| `spring.datasource.url` | `jdbc:mysql://localhost:3306/finance_tracker` | Database URL |
-| `spring.datasource.username` | `root` | MySQL username |
-| `spring.datasource.password` | `root` | MySQL password |
+| `spring.datasource.url` | `jdbc:mysql://localhost:3306/<your-database-name>` | Database URL |
+| `spring.datasource.username` | `your-username` | MySQL username |
+| `spring.datasource.password` | `your-password` | MySQL password |
 | `app.jwt.secret` | *(Base64 encoded)* | JWT signing secret |
 | `app.jwt.expiration-ms` | `86400000` (24h) | Access token expiry |
 | `app.jwt.refresh-expiration-ms` | `604800000` (7d) | Refresh token expiry |
@@ -421,9 +421,9 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ## 📧 Contact
 
-**Your Name** — [your.email@example.com](mailto:your.email@example.com)
+**Your Name** — Ashif Ansari
 
-**Project Link:** [https://github.com/YOUR_USERNAME/personal-finance-tracker](https://github.com/YOUR_USERNAME/personal-finance-tracker)
+**Project Link:** [https://github.com/ashif-45/personal-finance-tracker](https://github.com/ashif-45/personal-finance-tracker)
 
 ---
 
