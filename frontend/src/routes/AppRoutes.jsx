@@ -5,6 +5,7 @@ import DashboardPage from '../pages/DashboardPage.jsx';
 import TransactionsPage from '../pages/TransactionsPage.jsx';
 import BudgetsPage from '../pages/BudgetsPage.jsx';
 import ReportsPage from '../pages/ReportsPage.jsx';
+import ProfilePage from '../pages/ProfilePage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import DashboardLayout from '../components/layout/DashboardLayout.jsx';
 
@@ -19,15 +20,16 @@ function ProtectedLayout({ children }) {
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Protected Routes */}
+      {/* Protected */}
       <Route path="/dashboard" element={<ProtectedLayout><DashboardPage /></ProtectedLayout>} />
       <Route path="/transactions" element={<ProtectedLayout><TransactionsPage /></ProtectedLayout>} />
       <Route path="/budgets" element={<ProtectedLayout><BudgetsPage /></ProtectedLayout>} />
       <Route path="/reports" element={<ProtectedLayout><ReportsPage /></ProtectedLayout>} />
+      <Route path="/profile" element={<ProtectedLayout><ProfilePage /></ProtectedLayout>} />
 
       {/* Redirects */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

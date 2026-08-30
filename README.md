@@ -2,51 +2,66 @@
 
 A modern, full-stack **Personal Finance Tracker** application that helps users manage their income, expenses, budgets, and financial reports — all in one place.
 
-Built with **Spring Boot 4.1** (Java 21) on the backend and **React 19** (Vite 6) on the frontend, featuring JWT authentication, interactive charts, budget alerts, and a fully responsive UI.
+Built with **Spring Boot 4.1** (Java 21) on the backend and **React 19** (Vite 6) on the frontend, featuring JWT authentication, interactive charts, budget alerts, CSV bulk upload, and a fully responsive UI.
 
 ---
 
 ## ✨ Features
 
-### 🔐 Authentication
+### 🔐 Authentication & Security
 - User registration and login with JWT (Access + Refresh tokens)
 - Protected routes with automatic 401 redirect
 - Token persistence via localStorage
+- Role-based access control (ROLE_USER)
+- Password change with current password verification
 
 ### 💳 Transaction Management
 - Create, read, update, and delete transactions
 - Categorize as **Income** or **Expense**
 - Advanced filtering by date range, category, type, and keyword search
 - Paginated transaction list with sorting
+- **CSV Bulk Upload** — import hundreds of transactions at once
 
 ### 🏷️ Category Management
 - 12 pre-seeded default categories (Salary, Food, Transport, etc.)
 - Create custom categories with personalized colors
 - Auto-filter categories by transaction type in forms
+- **CSV Bulk Upload** — import custom categories in bulk
 
-### 📊 Budget Tracking *(Phase 3)*
-- Set monthly budgets per category
-- Visual progress bars with color-coded thresholds
+### 📊 Budget Tracking
+- Set monthly budgets per category or overall
+- Visual progress bars with color-coded thresholds (green → amber → red)
 - Smart alerts when spending exceeds budget percentage
+- **CSV Bulk Upload** — set multiple budgets at once
+- Budget alert banners on the dashboard
 
-### 📈 Dashboard & Reports *(Phase 4)*
+### 📈 Dashboard & Reports
 - Summary stat cards (Total Income, Expenses, Balance, Savings Rate)
 - Interactive spending breakdown pie chart (Recharts)
-- Income vs Expense bar chart
-- Monthly and yearly trend reports
-- Category-wise breakdown analysis
+- Income vs Expense bar chart (daily trend)
+- Monthly reports with year selector
+- Yearly overview with year-over-year comparison
+- Category-wise breakdown with pie chart + detail table
 
-### 👤 User Profile *(Phase 5)*
+### 👤 User Profile
 - View and edit profile information
 - Change password securely
-- Currency preference (default: INR)
+- Currency preference (INR, USD, EUR, GBP, JPY, CAD, AUD)
+
+### 📥 CSV Bulk Upload
+- Upload CSV files for **Transactions**, **Budgets**, and **Categories**
+- Downloadable CSV templates for each entity
+- Row-level error reporting (see exactly which rows failed and why)
+- Success/failure summary after each import
+- Automatic header row detection
 
 ### 🎨 UI/UX
 - Fully responsive mobile-first design (Tailwind CSS v4)
 - Custom-built UI components (no external component libraries)
 - Toast notifications for all user actions
 - Loading spinners and empty states
-- Dark/light theme support *(planned)*
+- Error boundary for graceful crash recovery
+- Collapsible sidebar navigation
 
 ---
 
@@ -63,6 +78,7 @@ Built with **Spring Boot 4.1** (Java 21) on the backend and **React 19** (Vite 6
 | MySQL | 8.4 LTS | Relational database |
 | JJWT | 0.12.6 | JWT token generation & validation |
 | Jakarta Validation | Latest | Request validation |
+| OpenCSV | 5.9 | CSV file parsing for bulk upload |
 | SpringDoc OpenAPI | 2.6.0 | Swagger UI / API docs |
 | Maven | 3.9.6 | Build tool |
 
@@ -84,6 +100,7 @@ Built with **Spring Boot 4.1** (Java 21) on the backend and **React 19** (Vite 6
 | Technology | Purpose |
 |---|---|
 | Docker + Docker Compose | Containerized deployment |
+| Nginx | Frontend production server & API proxy |
 | Git / GitHub | Version control |
 
 ---
@@ -110,7 +127,25 @@ personal-finance-tracker/
 │   │   │   └── UserController.java
 │   │   ├── dto/
 │   │   │   ├── request/
+│   │   │   │   ├── LoginRequest.java
+│   │   │   │   ├── RegisterRequest.java
+│   │   │   │   ├── TransactionRequest.java
+│   │   │   │   ├── CategoryRequest.java
+│   │   │   │   ├── BudgetRequest.java
+│   │   │   │   ├── UpdateProfileRequest.java
+│   │   │   │   └── ChangePasswordRequest.java
 │   │   │   └── response/
+│   │   │       ├── ApiResponse.java
+│   │   │       ├── AuthResponse.java
+│   │   │       ├── CategoryResponse.java
+│   │   │       ├── TransactionResponse.java
+│   │   │       ├── BudgetResponse.java
+│   │   │       ├── BudgetAlertResponse.java
+│   │   │       ├── DashboardResponse.java
+│   │   │       ├── ReportResponse.java
+│   │   │       ├── UserProfileResponse.java
+│   │   │       ├── PageResponse.java
+│   │   │       └── BulkUploadResponse.java
 │   │   ├── entity/
 │   │   │   ├── User.java
 │   │   │   ├── Transaction.java
@@ -118,9 +153,28 @@ personal-finance-tracker/
 │   │   │   ├── Budget.java
 │   │   │   └── enums/TransactionType.java
 │   │   ├── repository/
+│   │   │   ├── UserRepository.java
+│   │   │   ├── TransactionRepository.java
+│   │   │   ├── CategoryRepository.java
+│   │   │   └── BudgetRepository.java
 │   │   ├── service/
+│   │   │   ├── AuthService.java
+│   │   │   ├── TransactionService.java
+│   │   │   ├── CategoryService.java
+│   │   │   ├── BudgetService.java
+│   │   │   ├── DashboardService.java
+│   │   │   ├── ReportService.java
+│   │   │   ├── UserService.java
+│   │   │   └── CsvImportService.java
 │   │   ├── security/
+│   │   │   ├── JwtTokenProvider.java
+│   │   │   ├── JwtAuthenticationFilter.java
+│   │   │   ├── JwtAuthEntryPoint.java
+│   │   │   └── CustomUserDetailsService.java
 │   │   ├── exception/
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── ResourceNotFoundException.java
+│   │   │   └── BadRequestException.java
 │   │   └── util/DtoMapper.java
 │   ├── src/main/resources/
 │   │   ├── application.yml
@@ -131,22 +185,84 @@ personal-finance-tracker/
 ├── frontend/
 │   ├── src/
 │   │   ├── api/
+│   │   │   ├── fetchClient.js
+│   │   │   ├── authApi.js
+│   │   │   ├── transactionApi.js
+│   │   │   ├── budgetApi.js
+│   │   │   ├── categoryApi.js
+│   │   │   ├── dashboardApi.js
+│   │   │   ├── reportApi.js
+│   │   │   └── userApi.js
 │   │   ├── components/
-│   │   │   ├── ui/          (Button, Input, Card, Modal, etc.)
-│   │   │   ├── layout/      (Navbar, Sidebar, DashboardLayout)
-│   │   │   ├── auth/        (LoginForm, RegisterForm)
-│   │   │   ├── transactions/
-│   │   │   ├── budgets/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Card.jsx
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   ├── Badge.jsx
+│   │   │   │   ├── Select.jsx
+│   │   │   │   ├── Spinner.jsx
+│   │   │   │   ├── ProgressBar.jsx
+│   │   │   │   └── CsvUpload.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   └── DashboardLayout.jsx
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginForm.jsx
+│   │   │   │   └── RegisterForm.jsx
 │   │   │   ├── dashboard/
+│   │   │   │   ├── StatCards.jsx
+│   │   │   │   ├── SpendingChart.jsx
+│   │   │   │   ├── IncomeExpenseChart.jsx
+│   │   │   │   └── RecentTransactions.jsx
+│   │   │   ├── transactions/
+│   │   │   │   ├── TransactionList.jsx
+│   │   │   │   ├── TransactionForm.jsx
+│   │   │   │   └── TransactionFilters.jsx
+│   │   │   ├── budgets/
+│   │   │   │   ├── BudgetList.jsx
+│   │   │   │   ├── BudgetForm.jsx
+│   │   │   │   ├── BudgetProgressBar.jsx
+│   │   │   │   └── BudgetAlertBanner.jsx
 │   │   │   ├── reports/
-│   │   │   └── profile/
-│   │   ├── context/         (AuthContext, ThemeContext)
-│   │   ├── hooks/           (useAuth, useFetch, etc.)
+│   │   │   │   ├── MonthlyReport.jsx
+│   │   │   │   ├── YearlyReport.jsx
+│   │   │   │   └── CategoryBreakdown.jsx
+│   │   │   ├── categories/
+│   │   │   │   ├── CategoryForm.jsx
+│   │   │   │   └── CategoryManager.jsx
+│   │   │   ├── profile/
+│   │   │   │   ├── ProfileForm.jsx
+│   │   │   │   └── ChangePassword.jsx
+│   │   │   └── ErrorBoundary.jsx
+│   │   ├── context/AuthContext.jsx
+│   │   ├── hooks/
+│   │   │   ├── useAuth.js
+│   │   │   ├── useFetch.js
+│   │   │   └── useBudgets.js
 │   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── RegisterPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── TransactionsPage.jsx
+│   │   │   ├── BudgetsPage.jsx
+│   │   │   ├── ReportsPage.jsx
+│   │   │   └── ProfilePage.jsx
 │   │   ├── routes/
-│   │   └── utils/
-│   ├── package.json
+│   │   │   ├── AppRoutes.jsx
+│   │   │   └── ProtectedRoute.jsx
+│   │   ├── utils/
+│   │   │   ├── formatCurrency.js
+│   │   │   ├── formatDate.js
+│   │   │   └── constants.js
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── index.html
 │   ├── vite.config.js
+│   ├── nginx.conf
+│   ├── package.json
 │   └── Dockerfile
 │
 ├── docker-compose.yml
@@ -168,15 +284,14 @@ Make sure you have the following installed:
 - **MySQL 8.4** — [Download](https://dev.mysql.com/downloads/)
 - **Maven 3.9.6** — [Download](https://maven.apache.org/download.cgi)
 - **Git** — [Download](https://git-scm.com/)
-- **STS / IntelliJ IDEA** (for backend)
-- **VS Code** (for frontend)
+- **STS / IntelliJ IDEA** (backend), **VS Code** (frontend)
 
 ---
 
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/ashif-45/personal-finance-tracker
+git clone https://github.com/YOUR_USERNAME/personal-finance-tracker.git
 cd personal-finance-tracker
 ```
 
@@ -190,7 +305,7 @@ Create a MySQL database (or let Spring auto-create it):
 CREATE DATABASE IF NOT EXISTS finance_tracker;
 ```
 
-> **Note:** The application uses `spring.jpa.hibernate.ddl-auto=update`, so all tables will be created automatically on first run.
+> Tables are auto-created via `spring.jpa.hibernate.ddl-auto=update`.
 
 Update credentials in `backend/src/main/resources/application.yml` if your MySQL username/password differ from `your-username/your-password`:
 
@@ -244,41 +359,79 @@ The frontend will start on **http://localhost:5173**.
 
 ### 5️⃣ Test the Application
 
-1. Open [http://localhost:5173](http://localhost:5173) in your browser.
-2. Click **Register** and create a new account.
-3. You'll be redirected to the dashboard.
-4. Click **Add Transaction** to start tracking your finances.
-5. Click **Categories** to manage your income/expense categories.
+1. Open http://localhost:5173
+2. Register a new account
+3. Add transactions, set budgets, view reports
+4. Try CSV bulk upload from the Transactions page
+
+---
+
+## 📥 CSV Bulk Upload Guide
+
+### How It Works
+1. Navigate to **Transactions**, **Budgets**, or **Categories**
+2. Click the **"Import CSV"** button
+3. Download the template (optional but recommended)
+4. Fill in your data and upload the `.csv` file
+5. Review the success/failure report with row-level error details
+
+### CSV Formats
+
+#### Transactions
+```csv
+amount,type,categoryName,transactionDate,description
+500.00,EXPENSE,Food,2025-01-15,Lunch at restaurant
+50000.00,INCOME,Salary,2025-01-01,January salary
+200.00,EXPENSE,Transport,2025-01-10,Uber ride
+```
+- `type`: Must be `INCOME` or `EXPENSE`
+- `categoryName`: Must match an existing category name (case-insensitive)
+- `transactionDate`: Format `yyyy-MM-dd`
+
+#### Budgets
+```csv
+amount,month,year,categoryName,alertThreshold
+5000,1,2025,Food,80
+3000,1,2025,Transport,90
+10000,1,2025,,85
+```
+- `categoryName`: Leave empty for an overall budget
+- `alertThreshold`: Percentage (10-100), defaults to 80
+
+#### Categories
+```csv
+name,type,icon,color
+Groceries,EXPENSE,ShoppingCart,#EF4444
+Crypto,INCOME,Bitcoin,#F59E0B
+Gym,EXPENSE,Dumbbell,#8B5CF6
+```
+- `type`: Must be `INCOME` or `EXPENSE`
+- `color`: Hex code (e.g. `#3B82F6`), defaults to `#64748B`
 
 ---
 
 ## 🐳 Docker Deployment
 
-### Using Docker Compose (Recommended)
-
 ```bash
-# From the project root
+# Build and start all services
 docker-compose up --build
-```
 
-This will spin up:
-| Service | Port | Description |
-|---|---|---|
-| MySQL | 3306 | Database |
-| Backend | 8080 | Spring Boot API |
-| Frontend | 3000 | React app (production build) |
+# View logs
+docker-compose logs -f
 
-Access the app at **http://localhost:3000**.
-
-### Stop all services
-```bash
+# Stop all services
 docker-compose down
+
+# Fresh start (wipe database)
+docker-compose down -v && docker-compose up --build
 ```
 
-### Stop and remove volumes (fresh start)
-```bash
-docker-compose down -v
-```
+| Service | Port | URL |
+|---|---|---|
+| Frontend (Nginx) | 3000 | http://localhost:3000 |
+| Backend (Spring Boot) | 8080 | http://localhost:8080 |
+| MySQL | 3306 | localhost:3306 |
+| Swagger UI | 8080 | http://localhost:8080/swagger-ui.html |
 
 ---
 
@@ -294,11 +447,12 @@ docker-compose down -v
 ### Transactions
 | Method | Endpoint | Description | Auth |
 |---|---|---|---|
-| GET | `/api/transactions` | List transactions (paginated, filterable) | ✅ |
+| GET | `/api/transactions` | List (paginated, filterable) | ✅ |
 | GET | `/api/transactions/{id}` | Get single transaction | ✅ |
 | POST | `/api/transactions` | Create transaction | ✅ |
 | PUT | `/api/transactions/{id}` | Update transaction | ✅ |
 | DELETE | `/api/transactions/{id}` | Delete transaction | ✅ |
+| POST | `/api/transactions/bulk-upload` | **CSV bulk upload** | ✅ |
 
 ### Categories
 | Method | Endpoint | Description | Auth |
@@ -307,6 +461,7 @@ docker-compose down -v
 | POST | `/api/categories` | Create custom category | ✅ |
 | PUT | `/api/categories/{id}` | Update category | ✅ |
 | DELETE | `/api/categories/{id}` | Delete category | ✅ |
+| POST | `/api/categories/bulk-upload` | **CSV bulk upload** | ✅ |
 
 ### Budgets
 | Method | Endpoint | Description | Auth |
@@ -317,20 +472,19 @@ docker-compose down -v
 | PUT | `/api/budgets/{id}` | Update budget | ✅ |
 | DELETE | `/api/budgets/{id}` | Delete budget | ✅ |
 | GET | `/api/budgets/alerts` | Get budget alerts | ✅ |
+| POST | `/api/budgets/bulk-upload` | **CSV bulk upload** | ✅ |
 
 ### Dashboard
 | Method | Endpoint | Description | Auth |
 |---|---|---|---|
-| GET | `/api/dashboard/summary` | Financial summary | ✅ |
-| GET | `/api/dashboard/recent` | Recent transactions | ✅ |
-| GET | `/api/dashboard/chart-data` | Chart data | ✅ |
+| GET | `/api/dashboard/summary` | Financial summary + charts | ✅ |
 
 ### Reports
 | Method | Endpoint | Description | Auth |
 |---|---|---|---|
-| GET | `/api/reports/monthly` | Monthly report | ✅ |
-| GET | `/api/reports/yearly` | Yearly report | ✅ |
-| GET | `/api/reports/category` | Category breakdown | ✅ |
+| GET | `/api/reports/monthly?year=2025` | Monthly report | ✅ |
+| GET | `/api/reports/yearly` | Yearly overview | ✅ |
+| GET | `/api/reports/category?month=1&year=2025` | Category breakdown | ✅ |
 
 ### User Profile
 | Method | Endpoint | Description | Auth |
@@ -340,6 +494,27 @@ docker-compose down -v
 | PUT | `/api/users/change-password` | Change password | ✅ |
 
 > **Full interactive API docs** available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) when the backend is running.
+
+---
+
+## 🗄️ Database Schema
+
+```
+users ──────────┐
+  │             │
+  ├──< categories (12 defaults + custom)
+  │
+  ├──< transactions ──> categories
+  │
+  └──< budgets ───────> categories
+```
+
+| Table | Description |
+|---|---|
+| `users` | User accounts with profile info |
+| `categories` | Income/Expense categories |
+| `transactions` | Financial records linked to user & category |
+| `budgets` | Monthly spending limits per category |
 
 ---
 
@@ -354,26 +529,6 @@ docker-compose down -v
 | `app.jwt.secret` | *(Base64 encoded)* | JWT signing secret |
 | `app.jwt.expiration-ms` | `86400000` (24h) | Access token expiry |
 | `app.jwt.refresh-expiration-ms` | `604800000` (7d) | Refresh token expiry |
-
----
-
-## 🗄️ Database Schema
-
-```
-users ──────────┐
-  │             │
-  ├──< categories (default + custom)
-  │
-  ├──< transactions ──> categories
-  │
-  └──< budgets ───────> categories
-```
-
-### Tables
-- **users** — User accounts with profile info
-- **categories** — Income/Expense categories (12 defaults + custom)
-- **transactions** — Financial transactions linked to user & category
-- **budgets** — Monthly spending limits per category
 
 ---
 
@@ -395,11 +550,11 @@ users ──────────┐
 
 | Phase | Status | Description |
 |---|---|---|
-| Phase 1 | ✅ Complete | Project setup, JWT authentication, Login/Register |
+| Phase 1 | ✅ Complete | Project setup, JWT auth, Login/Register |
 | Phase 2 | ✅ Complete | Transaction CRUD, Category management, Filtering |
-| Phase 3 | 🔄 In Progress | Budget tracking, Alert system |
-| Phase 4 | ⏳ Pending | Dashboard, Charts, Reports |
-| Phase 5 | ⏳ Pending | Profile, Docker, Polish, Deploy |
+| Phase 3 | ✅ Complete | Budget tracking, Alert system |
+| Phase 4 | ✅ Complete | Dashboard, Charts, Reports |
+| Phase 5 | ✅ Complete | Profile, CSV Upload, Docker, Polish, Deploy |
 
 ---
 
@@ -415,7 +570,7 @@ users ──────────┐
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ---
 
@@ -429,6 +584,35 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 > ⭐ If you found this project helpful, please give it a star on GitHub!
 ```
+
+---
+
+## 📋 PHASE 5 + CSV UPLOAD CHECKLIST
+
+| Feature | Status |
+|---|---|
+| UserController (profile, change password) | ✅ |
+| ProfilePage with tabs | ✅ |
+| ProfileForm + ChangePassword components | ✅ |
+| ErrorBoundary | ✅ |
+| DashboardLayout (Sidebar + Navbar) | ✅ |
+| Docker Compose (MySQL + Backend + Frontend) | ✅ |
+| Backend Dockerfile (multi-stage, non-root) | ✅ |
+| Frontend Dockerfile + nginx.conf | ✅ |
+| application.yml (Docker env vars) | ✅ |
+| .gitignore | ✅ |
+| README.md | ✅ |
+| **CSV: OpenCSV dependency** | ✅ |
+| **CSV: CsvImportService (3 import methods)** | ✅ |
+| **CSV: BulkUploadResponse DTO** | ✅ |
+| **CSV: Transaction bulk-upload endpoint** | ✅ |
+| **CSV: Budget bulk-upload endpoint** | ✅ |
+| **CSV: Category bulk-upload endpoint** | ✅ |
+| **CSV: fetchClient.upload() (FormData)** | ✅ |
+| **CSV: CsvUpload.jsx (reusable component)** | ✅ |
+| **CSV: Template download feature** | ✅ |
+| **CSV: Row-level error reporting** | ✅ |
+| **CSV: Upload modals on all 3 pages** | ✅ |
 
 ---
 
