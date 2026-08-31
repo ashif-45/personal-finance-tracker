@@ -78,12 +78,24 @@ public class BudgetService {
         }).toList();
     }
 
+    /**
+     * Get budgets for a specific month and year.
+     * If month or year is null, defaults to the current month/year.
+     */
     @Transactional(readOnly = true)
-    public List<BudgetResponse> getCurrentMonthBudgets(String userEmail) {
+    public List<BudgetResponse> getBudgetsByPeriod(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         LocalDate now = LocalDate.now();
+
+        int targetMonth = (month != null && month >= 1 && month <= 12)
+                ? month
+                : now.getMonthValue();
+        int targetYear = (year != null && year >= 2020 && year <= 2100)
+                ? year
+                : now.getYear();
+
         List<Budget> budgets = budgetRepository.findByUserIdAndMonthAndYear(
-                user.getId(), now.getMonthValue(), now.getYear()
+                user.getId(), targetMonth, targetYear
         );
 
         return budgets.stream().map(b -> {
@@ -91,6 +103,12 @@ public class BudgetService {
             BigDecimal spent = calculateSpent(user.getId(), catId, b.getMonth(), b.getYear());
             return DtoMapper.toBudgetResponse(b, spent);
         }).toList();
+    }
+
+    // Keep getCurrentMonthBudgets as a thin wrapper if other code still calls it
+    @Transactional(readOnly = true)
+    public List<BudgetResponse> getCurrentMonthBudgets(String userEmail) {
+        return getBudgetsByPeriod(userEmail, null, null);
     }
 
     @Transactional

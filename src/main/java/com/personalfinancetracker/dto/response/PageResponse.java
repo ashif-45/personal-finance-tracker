@@ -12,10 +12,13 @@ public record PageResponse<T>(
         boolean isLast
 ) {
     public static <T> PageResponse<T> from(Page<T> page) {
+        // If size is Integer.MAX_VALUE, return -1 to the frontend
+        int reportedSize = (page.getSize() == Integer.MAX_VALUE) ? -1 : page.getSize();
+        
         return new PageResponse<>(
                 page.getContent(),
                 page.getNumber(),
-                page.getSize(),
+                reportedSize,
                 page.getTotalElements(),
                 page.getTotalPages(),
                 page.isLast()

@@ -9,17 +9,23 @@ const schema = z.object({
   amount: z.coerce.number().min(1, 'Budget must be at least ₹1'),
   month: z.coerce.number().min(1).max(12),
   year: z.coerce.number().min(2020).max(2100),
-  categoryId: z.coerce.number().nullable().optional(),
+  categoryId: z.coerce.number().nullable().optional().or(z.literal('')),
   alertThreshold: z.coerce.number().min(10).max(100),
 });
 
 const MONTHS = [
-  { value: 1, label: 'January' }, { value: 2, label: 'February' },
-  { value: 3, label: 'March' },   { value: 4, label: 'April' },
-  { value: 5, label: 'May' },     { value: 6, label: 'June' },
-  { value: 7, label: 'July' },    { value: 8, label: 'August' },
-  { value: 9, label: 'September' },{ value: 10, label: 'October' },
-  { value: 11, label: 'November' },{ value: 12, label: 'December' },
+  { value: 1, label: 'January' },
+  { value: 2, label: 'February' },
+  { value: 3, label: 'March' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'May' },
+  { value: 6, label: 'June' },
+  { value: 7, label: 'July' },
+  { value: 8, label: 'August' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'October' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'December' },
 ];
 
 export default function BudgetForm({ onSubmit, initialData = null, categories = [], onCancel }) {
@@ -40,11 +46,19 @@ export default function BudgetForm({ onSubmit, initialData = null, categories = 
     },
   });
 
-  // Only show EXPENSE categories for budgets
   const expenseCategories = categories.filter((c) => c.type === 'EXPENSE');
 
+  const handleFormSubmit = (values) => {
+    onSubmit({
+      ...values,
+      categoryId: values.categoryId === '' || values.categoryId == null
+        ? null
+        : Number(values.categoryId),
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Input
         label="Budget Amount (₹)"
         type="number"
@@ -71,7 +85,7 @@ export default function BudgetForm({ onSubmit, initialData = null, categories = 
 
       <Select
         label="Category (optional — leave empty for overall budget)"
-        placeholder="All Categories"
+        placeholder="All Categories (Overall)"
         options={expenseCategories.map((c) => ({ value: c.id, label: c.name }))}
         error={errors.categoryId?.message}
         {...register('categoryId')}
@@ -89,11 +103,11 @@ export default function BudgetForm({ onSubmit, initialData = null, categories = 
       </p>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-        <Button variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" loading={isSubmitting}>
-          {initialData ? 'Update Budget' : 'Set Budget'}
+          {initialData?.id ? 'Update Budget' : 'Set Budget'}
         </Button>
       </div>
     </form>

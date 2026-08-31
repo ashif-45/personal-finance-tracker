@@ -76,8 +76,16 @@ public class TransactionService {
 
         User user = getUserByEmail(userEmail);
 
-        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        // Fix for negative size (ALL):
+        // If size <= 0 (e.g. -1 for ALL), use Integer.MAX_VALUE and page 0
+        int effectiveSize = (size <= 0) ? Integer.MAX_VALUE : size;
+        int effectivePage = (size <= 0) ? 0 : page;
+
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize, sort);
 
         Specification<Transaction> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

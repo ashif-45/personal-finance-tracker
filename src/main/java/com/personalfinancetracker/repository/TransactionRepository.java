@@ -140,4 +140,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end
     );
+    
+    @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId AND t.transactionDate BETWEEN :start AND :end ORDER BY t.transactionDate DESC, t.createdAt DESC")
+    List<Transaction> findTop5ByUserIdAndDateBetweenOrderByTransactionDateDesc(
+            @Param("userId") Long userId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
+            Pageable pageable
+    );
 }

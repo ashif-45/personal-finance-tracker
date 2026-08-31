@@ -1,38 +1,42 @@
 spring:
-  application:
-    name: personal-finance-tracker
-  profiles:
-    active: dev
-  datasource:
-    url: jdbc:mysql://localhost:3306/finance_tracker?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: false
+    application:
+        name: personal-finance-tracker
+    profiles:
+        active: dev
+    datasource:
+        url: jdbc:mysql://localhost:3306/finance_tracker?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+        username: root
+        password: root
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+                format_sql: false
+    servlet:
+        multipart:
+            max-file-size: 30MB
+            max-request-size: 30MB
 
 server:
-  port: 8080
+    port: 8080
 
 app:
-  jwt:
-    secret: ZmluYW5jZS10cmFja2VyLXNlY3JldC1rZXktZm9yLWp3dC10b2tlbi1zaWduaW5nLXZlcnktbG9uZy1zdHJpbmc=
-    expiration-ms: 86400000
-    refresh-expiration-ms: 604800000
+    jwt:
+        secret: ZmluYW5jZS10cmFja2VyLXNlY3JldC1rZXktZm9yLWp3dC10b2tlbi1zaWduaW5nLXZlcnktbG9uZy1zdHJpbmc=
+        expiration-ms: 86400000
+        refresh-expiration-ms: 604800000
 
 springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
+    swagger-ui:
+        path: /swagger-ui.html
+    api-docs:
+        path: /v3/api-docs
 
 logging:
-  level:
-    com.personalfinancetracker: DEBUG
-    org.springframework.security: INFO
+    level:
+        com.personalfinancetracker: DEBUG
+        org.springframework.security: INFO

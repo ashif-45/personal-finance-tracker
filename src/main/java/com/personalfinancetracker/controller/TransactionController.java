@@ -11,6 +11,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.personalfinancetracker.dto.response.BulkUploadResponse;
+import com.personalfinancetracker.service.CsvImportService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -19,11 +22,13 @@ import java.time.LocalDate;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final CsvImportService csvImportService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService,
+                                 CsvImportService csvImportService) {
         this.transactionService = transactionService;
+        this.csvImportService = csvImportService;
     }
-
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<TransactionResponse>>> getTransactions(
             Authentication auth,
@@ -41,6 +46,22 @@ public class TransactionController {
                 auth.getName(), startDate, endDate, categoryId, type, search, page, size, sortBy, sortDirection
         );
         return ResponseEntity.ok(ApiResponse.success(response));
+        
+        
+    }
+    
+    @PostMapping("/bulk-upload")
+    public ResponseEntity<ApiResponse<BulkUploadResponse>> bulkUploadTransactions(
+            Authentication auth,
+            @RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Please upload a valid CSV file"));
+        }
+        BulkUploadResponse response = csvImportService.importTransactions(auth.getName(), file);
+        String msg = String.format("Imported %d of %d transactions successfully",
+                response.successCount(), response.totalRows());
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 
     @GetMapping("/{id}")

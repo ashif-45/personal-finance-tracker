@@ -14,4 +14,5 @@ export const transactionApi = {
   create: (data) => fetchClient.post('/transactions', data),
   update: (id, data) => fetchClient.put(`/transactions/${id}`, data),
   delete: (id) => fetchClient.delete(`/transactions/${id}`),
+  bulkUpload: (file) => fetchClient.upload('/transactions/bulk-upload', file),
 };

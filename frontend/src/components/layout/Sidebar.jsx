@@ -23,7 +23,7 @@ export default function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-200 ease-in-out
+        className={`fixed top-0 left-0 h-full w-58 bg-white border-r border-gray-200 z-50 transform transition-transform duration-200 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:z-auto`}
       >
         {/* Logo */}
@@ -31,7 +31,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
             <Wallet size={20} className="text-white" />
           </div>
-          <span className="text-lg font-bold text-gray-900">FinTracker</span>
+          <span className="text-lg font-bold text-gray-900">Finance Tracker</span>
         </div>
 
         {/* Nav Links */}

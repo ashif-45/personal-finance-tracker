@@ -5,4 +5,5 @@ export const categoryApi = {
   create: (data) => fetchClient.post('/categories', data),
   update: (id, data) => fetchClient.put(`/categories/${id}`, data),
   delete: (id) => fetchClient.delete(`/categories/${id}`),
+  bulkUpload: (file) => fetchClient.upload('/categories/bulk-upload', file),
 };

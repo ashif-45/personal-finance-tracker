@@ -1,6 +1,9 @@
 package com.personalfinancetracker.controller;
 
 import com.personalfinancetracker.dto.request.CategoryRequest;
+import com.personalfinancetracker.dto.response.BulkUploadResponse;
+import com.personalfinancetracker.service.CsvImportService;
+import org.springframework.web.multipart.MultipartFile;
 import com.personalfinancetracker.dto.response.ApiResponse;
 import com.personalfinancetracker.dto.response.CategoryResponse;
 import com.personalfinancetracker.entity.enums.TransactionType;
@@ -17,11 +20,25 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final CsvImportService csvImportService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, CsvImportService csvImportService) {
         this.categoryService = categoryService;
+        this.csvImportService = csvImportService;
     }
-
+    @PostMapping("/bulk-upload")
+    public ResponseEntity<ApiResponse<BulkUploadResponse>> bulkUploadCategories(
+            Authentication auth,
+            @RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Please upload a valid CSV file"));
+        }
+        BulkUploadResponse response = csvImportService.importCategories(auth.getName(), file);
+        String msg = String.format("Imported %d of %d categories successfully",
+                response.successCount(), response.totalRows());
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
+    }
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getCategories(
             Authentication auth,

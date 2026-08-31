@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -41,20 +40,22 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public DashboardResponse getSummary(String userEmail) {
+    public DashboardResponse getSummary(String userEmail, LocalDate startDate, LocalDate endDate) {
         User user = getUserByEmail(userEmail);
         Long userId = user.getId();
 
-        // Current month date range
-        YearMonth currentMonth = YearMonth.now();
-        LocalDate start = currentMonth.atDay(1);
-        LocalDate end = currentMonth.atEndOfMonth();
+        // If dates are null, default to current month
+        if (startDate == null || endDate == null) {
+            YearMonth currentMonth = YearMonth.now();
+            startDate = currentMonth.atDay(1);
+            endDate = currentMonth.atEndOfMonth();
+        }
 
         // Totals
         BigDecimal totalIncome = transactionRepository
-                .sumAmountByUserIdAndTypeAndDateBetween(userId, TransactionType.INCOME, start, end);
+                .sumAmountByUserIdAndTypeAndDateBetween(userId, TransactionType.INCOME, startDate, endDate);
         BigDecimal totalExpenses = transactionRepository
-                .sumAmountByUserIdAndTypeAndDateBetween(userId, TransactionType.EXPENSE, start, end);
+                .sumAmountByUserIdAndTypeAndDateBetween(userId, TransactionType.EXPENSE, startDate, endDate);
         BigDecimal balance = totalIncome.subtract(totalExpenses);
 
         Double savingsRate = totalIncome.compareTo(BigDecimal.ZERO) > 0
@@ -63,18 +64,19 @@ public class DashboardService {
                     .doubleValue()
                 : 0.0;
 
-        Long txCount = transactionRepository.countByUserIdAndDateBetween(userId, start, end);
+        Long txCount = transactionRepository.countByUserIdAndDateBetween(userId, startDate, endDate);
 
-        // Recent transactions (last 5)
+        // Recent transactions (last 5 within the selected date range)
         List<Transaction> recent = transactionRepository
-                .findTop5ByUserIdOrderByTransactionDateDesc(userId, PageRequest.of(0, 5));
+                .findTop5ByUserIdAndDateBetweenOrderByTransactionDateDesc(userId, startDate, endDate, PageRequest.of(0, 5));
+        
         List<TransactionResponse> recentDtos = recent.stream()
                 .map(DtoMapper::toTransactionResponse)
                 .toList();
 
-        // Category breakdown (expenses only, current month)
+        // Category breakdown (expenses only, for selected period)
         List<Object[]> catRows = transactionRepository
-                .findCategorySpendingByUserIdAndDateBetween(userId, start, end);
+                .findCategorySpendingByUserIdAndDateBetween(userId, startDate, endDate);
 
         BigDecimal totalCatSpending = catRows.stream()
                 .map(row -> (BigDecimal) row[2])
@@ -94,13 +96,12 @@ public class DashboardService {
                 })
                 .toList();
 
-        // Daily trend (current month)
+        // Daily trend
         List<Object[]> dailyRows = transactionRepository
-                .findDailyTotalsByUserIdAndDateBetween(userId, start, end);
+                .findDailyTotalsByUserIdAndDateBetween(userId, startDate, endDate);
 
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM");
 
-        // Group by date
         Map<LocalDate, DailySpending> dailyMap = new LinkedHashMap<>();
         for (Object[] row : dailyRows) {
             LocalDate date = (LocalDate) row[0];
