@@ -6,6 +6,71 @@ Built with **Spring Boot 4.1** (Java 21) on the backend and **React 19** (Vite 6
 
 ---
 
+## 📸 Application Showcase
+
+### Dashboard & Analytics
+<p align="center">
+  <img src="screenshots/dashboard-01.png" width="100%" alt="Dashboard Overview" />
+  <img src="screenshots/reports-01.png" width="100%" alt="Monthly Reports" />
+</p>
+
+### Transactions & Categories
+<p align="center">
+  <img src="screenshots/transactions.png" width="100%" alt="Transaction List" />
+  <img src="screenshots/new-transaction.png" width="100%" alt="Add Transaction" />
+</p>
+<p align="center">
+  <img src="screenshots/category-creation.png" width="100%" alt="Create Category" />
+</p>
+
+### Budgets & Tracking
+<p align="center">
+  <img src="screenshots/budget-01.png" width="100%" alt="Budget Overview" />
+  <img src="screenshots/new-budget.png" width="100%" alt="Set New Budget" />
+</p>
+
+### CSV Bulk Uploads
+<p align="center">
+  <img src="screenshots/bulk-upload-transactions.png" width="100%" alt="Bulk Upload Transactions" />
+  <img src="screenshots/bulk-upload-budgets.png" width="100%" alt="Bulk Upload Budgets" />
+  <img src="screenshots/bulk-upload-categories.png" width="100%" alt="Bulk Upload Categories" />
+</p>
+
+### User Profile
+<p align="center">
+  <img src="screenshots/profile-01.png" width="100%" alt="User Profile" />
+</p>
+
+---
+
+## ✨ Key Features
+
+### 📈 Advanced Dashboard & Reports
+- **Dynamic Filtering:** View summary statistics by **Monthly** selection or **Custom Date Ranges**.
+- **Interactive Charts:** Recharts-powered pie charts for category breakdowns and bar charts for daily/monthly income vs. expense trends.
+- **Dedicated Reports:** Deep dive into Year-over-Year (YoY) metrics and detailed category spending percentages.
+
+### 💳 Transaction Management
+- **Smart Data Grid:** Filter by date, category, type, and search queries.
+- **Dynamic Pagination:** Select rows per page (20, 50, 100) or fetch **ALL** transactions at once.
+- Custom UI Modals for creations, edits, and deletion confirmations (no native browser alerts).
+
+### 📊 Budgeting & Smart Alerts
+- **Historical Tracking:** Navigate back and forth between past and future months to view previous budgets or plan ahead.
+- **Visual Thresholds:** Progress bars automatically change color (Green → Amber → Red) as you approach your limits.
+- **Notification Center:** A bell icon tracks unread budget alerts (Warnings & Critical thresholds), displaying session-based toast notifications on login.
+
+### 📥 CSV Bulk Upload Engine
+- Upload massive amounts of data at once for **Transactions**, **Budgets**, and **Categories**.
+- **Template Generation:** Download dynamically generated CSV templates directly from the UI.
+- **Row-Level Validation:** Get precise error messages for failed rows while successfully saving valid ones.
+
+### 🔐 Authentication & Profile
+- JWT-based Auth (Access & Refresh tokens) with secure local storage.
+- Update profile details, change passwords securely, and set custom default currencies.
+
+---
+
 ## ✨ Features
 
 ### 🔐 Authentication & Security
@@ -529,20 +594,6 @@ users ──────────┐
 | `app.jwt.secret` | *(Base64 encoded)* | JWT signing secret |
 | `app.jwt.expiration-ms` | `86400000` (24h) | Access token expiry |
 | `app.jwt.refresh-expiration-ms` | `604800000` (7d) | Refresh token expiry |
-
----
-
-## 📸 Screenshots
-
-> *Screenshots will be added after Phase 5 completion.*
-
-| Page | Preview |
-|---|---|
-| Login | *Coming soon* |
-| Dashboard | *Coming soon* |
-| Transactions | *Coming soon* |
-| Budgets | *Coming soon* |
-| Reports | *Coming soon* |
 
 ---
 
